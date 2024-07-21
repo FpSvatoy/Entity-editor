@@ -14,6 +14,7 @@ import javax.imageio.ImageIO;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
@@ -27,6 +28,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
+import exception.DuplicateEntryException;
 import model.Entity;
 
 
@@ -198,29 +200,49 @@ public class Project implements Iterable<Entity> {
 		}
 		return null;
 	}
-	/*
-	 * Добавляется обьект как в список всех сущностей, так и в xml-метаданные дерева(element objecttype)
-	 * Это лишь добавление в метаданные, а не парсинг в файл! не путать! 
-	 * Для парсинга будет сделана отдельная функция!
+	/**  
+	 * Adds a new Entity to in-editor list of all entities and it's in-memory XML-representiation.<br>
+	 * Does not write anything to actual XML-file, use {@link #writeXML()} for it
+	 * @throws DuplicateEntryException - thrown if an entity with such a name already exists
+	 * @params e - entity to add
 	*/
-	public void addEntity(Entity e) {
-		listEntity.add(e);
-		Element objecttype = document.createElement("objecttype");
-		objecttype.setAttribute("name", e.getName());
-		objecttype.setAttribute("color", "000000");//color of entity, needed by Tiled editor
-		document.getElementsByTagName("objecttypes").item(0).appendChild(objecttype);
-		/*
-		 * TODO: set "class" property too (code below)
-		Element property = document.createElement("property");
-		objecttype.appendChild(property);
-		document.appendChild(objecttype);
-		property.setAttribute("name", "class");
-		property.setAttribute("type", "string");
-		property.setAttribute("default", e.getType());
+	public void addEntity(Entity e) throws DuplicateEntryException {
 		
-		 * creating hitbox or drowbox attributes in advance is insufficient
-		 * they will be added while saving
-		 */
+		if(getEntityByName(e.getName()) != null) 
+			throw new DuplicateEntryException("The entity with the name '" + e.getName() + "' already exists!");
+			
+		listEntity.add(e);
+		
+		Element objecttypeElement = document.createElement("objecttype");
+		document.getElementsByTagName("objecttypes")// get document root element named "objecttypes"
+				.item(0)
+				.appendChild(objecttypeElement);	// add new "objecttype" element as a child
+
+		objecttypeElement.setAttribute("name", e.getName());
+		objecttypeElement.setAttribute("color", "000000");//color of entity, needed by Tiled editor
+
+		// format: <property name="class" type="string" default="INSERT REAL TYPE HERE"/>
+		Element classProperty = document.createElement("property");
+		classProperty.setAttribute("name", "class");
+		classProperty.setAttribute("type", "string");
+		classProperty.setAttribute("default", e.getType());
+		objecttypeElement.appendChild(classProperty);
+		
+		// format: <property name="drawbox" type="string" default="INSERT 3 POINTS COORDINTANTES HERE"/> 
+		Element drawboxProperty = document.createElement("property");
+		drawboxProperty.setAttribute("name", "drawbox");
+		drawboxProperty.setAttribute("type", "string");
+		drawboxProperty.setAttribute("default", ""); // empty, because on creation there is no drawbox yet
+		objecttypeElement.appendChild(drawboxProperty);
+		
+		// format: <property name="hitbox" type="string" default="HITBOX_TYPE OFFSET_X OFFSET_Y SIZE"/> 
+		Element hitboxProperty = document.createElement("property");
+		hitboxProperty.setAttribute("name", "hitbox");
+		hitboxProperty.setAttribute("type", "string");
+		hitboxProperty.setAttribute("default", ""); // empty, no hitbox yet
+		objecttypeElement.appendChild(hitboxProperty);
+		
+		//printXMlToConsole(); //DEBUG!
 	}
 	
 	/*
@@ -243,7 +265,7 @@ public class Project implements Iterable<Entity> {
 	/**
 	 * Возвращает объект сущности с заданным именем, или вбрасывает исключение, если такой сущности не существует.
 	 * */
-	public Entity getEntityByName(String name) throws Exception {
+	public Entity getEntityByName(String name) {
 		//debug print
 		//System.out.println("----- session started ------");
 		for(Entity e: listEntity) {
@@ -252,45 +274,18 @@ public class Project implements Iterable<Entity> {
 				return e;
 		}
 		
-		// можно было бы и просто null возвращать, но обращение за несуществующей сущностью само по себе нехороший прецедент
-		// так что исключение призвано обратить внимание пользователя, если такое действительно случится
-		throw new Exception("No entity with such name!");
+		return null;
 	}
 	
-	public void save() {
-		/*
-		 * thanks to addEntity() and removeEntity() our Document and listEntity
-		 * are interchangeable - they content exactly the same set of objects.
-		 * So we'll iterate over Document instead listEntity. It's more convient
-		 * in this case.
-		 * */
-		NodeList objecttypes = document.getElementsByTagName("objecttype");
-		for(int i = 0; i < objecttypes.getLength(); i++) {
-			Node objecttype = objecttypes.item(i);
-			NodeList propertiesList = objecttype.getChildNodes();
-			for(int j = 0; j < objecttypes.getLength(); j++) {
-				Element property = (Element) propertiesList.item(j);
-				NamedNodeMap attributes = property.getAttributes();
-				String name = attributes.getNamedItem("name").getNodeValue();
-				Entity entity = null;
-				try {
-					entity = getEntityByName(name);
-					
-				} catch (Exception e) {
-					//if there is no entity with such name we'll skip further parsing
-					System.err.println("Entity "+name+" is not found");
-				}
-			}
-		}
-		
-		// parsing complete, writing to file now
-		writeXML();
-	}
 	
 	private void writeXML() {
 		try {
 			TransformerFactory transformerFactory = TransformerFactory.newInstance();
+	        transformerFactory.setAttribute("indent-number", 4);
 			Transformer transformer = transformerFactory.newTransformer();
+	        transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
+	        transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+
 			DOMSource source = new DOMSource(document);
 			StreamResult result = new StreamResult(new FileOutputStream(path));
 			transformer.transform(source, result);
@@ -300,11 +295,26 @@ public class Project implements Iterable<Entity> {
 	}
 		
 	public void PrintEntitys() {
-		// TODO Auto-generated method stub
 		for(Entity ent:listEntity) {
 			ent.PrintEntity();
 		}
-		
+	}
+	
+	
+	public void printXMlToConsole() {
+		try {
+			TransformerFactory transformerFactory = TransformerFactory.newInstance();
+	        transformerFactory.setAttribute("indent-number", 4);
+			Transformer transformer = transformerFactory.newTransformer();
+	        transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
+	        transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+	        
+			DOMSource source = new DOMSource(document);
+			StreamResult result = new StreamResult(System.out);
+			transformer.transform(source, result);
+		} catch (TransformerException e) {
+			System.err.println("Cannot print XML to console. "+e);
+		}
 	}
 
 	@Override

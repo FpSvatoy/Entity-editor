@@ -29,6 +29,7 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import org.xml.sax.SAXException;
 
+import exception.DuplicateEntryException;
 import listeners.CreateFrameAddElementListener;
 import listeners.RemoveListElementEntityListener;
 import model.Drawbox;
@@ -90,7 +91,7 @@ public class ListGUI extends JPanel {
     	return (String) list.getSelectedValue();
     }
     
-    public void addListElement(String name,String solid) {
+    public void addListElement(String name,String solid) throws DuplicateEntryException {
     	// плейсхолдеры для новых хитбоксов и дроубоксов, иначе всё валится с NPE
     	List<Point> hitboxPoints = new LinkedList<Point>();
     	List<Point> drawboxPoints = new LinkedList<Point>();
@@ -101,7 +102,7 @@ public class ListGUI extends JPanel {
     	Entity e = new Entity(name, hitbox, drawbox);
     	e.setType(solid);
     	logger.finer("Entity \""+name+"\" was created.");
-    	Project.getInstance().addEntity(e);
+		Project.getInstance().addEntity(e);
     	updateList();
     }
     

@@ -10,6 +10,7 @@ import javax.swing.JTextField;
 import javax.swing.event.ListDataEvent;
 import javax.swing.event.ListDataListener;
 
+import exception.DuplicateEntryException;
 import gui.ListGUI;
 import gui.PropertyFrameAddElement;
 
@@ -24,7 +25,11 @@ public class AddListElementEntityListener implements ActionListener
 	
 	@Override
 	public void actionPerformed(ActionEvent e) {		
-		listGUI.addListElement(propertyFrame.getInputName(),propertyFrame.getInputType());
-		propertyFrame.dispose();
+		try {
+			listGUI.addListElement(propertyFrame.getInputName(),propertyFrame.getInputType());
+			propertyFrame.dispose();
+		} catch (DuplicateEntryException e1) {
+			JOptionPane.showMessageDialog(propertyFrame, e1.getMessage(), "Cannot create an entity.", JOptionPane.ERROR_MESSAGE);
+		}
 	}
 }
