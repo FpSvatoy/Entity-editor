@@ -4,8 +4,6 @@ public class Entity {
 	private String thisName;
 	private Drawbox thisDrawbox;
 	private Hitbox thisHitbox;
-	private Formatter formaterHitbox;
-	private Formatter formaterDrawbox;
 	private String type;
 	
 	public Entity(String name,String drawbox,String hitbox) {
@@ -40,14 +38,6 @@ public class Entity {
 		thisHitbox = outHitbox;
 	};
 	
-	public void setFormaterHitbox(Formatter outFormaterHitbox) {
-		formaterHitbox = outFormaterHitbox;
-	};
-	
-	public void setFormaterDrawbox(Formatter outFormaterDrawbox) {
-		formaterDrawbox = outFormaterDrawbox;
-	};
-	
 	public String getName() {
 		return thisName;
 	};
@@ -60,13 +50,6 @@ public class Entity {
 		return thisHitbox;
 	};
 	
-	public Formatter getFormaterHitbox() {
-		return formaterHitbox;
-	};	
-	
-	public Formatter getFormaterDrawbox() {
-		return formaterDrawbox;
-	};
 	public void PrintEntity() {
 		System.out.println("---------------------");
 		System.out.println("Name: "+thisName);

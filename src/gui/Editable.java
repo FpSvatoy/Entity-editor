@@ -22,7 +22,7 @@ public abstract class Editable extends JPanel implements MouseListener, MouseMot
 	
 	protected ListGUI listGUI;
 	protected Entity entity;
-	protected String name;
+	protected String selectedEntityName;
 	protected BufferedImage image;
 	JPanel drawPanel;
 
@@ -51,11 +51,11 @@ public abstract class Editable extends JPanel implements MouseListener, MouseMot
 	
     //get,set для name
     public String getName() {
-		return name;
+		return selectedEntityName;
 	}
 	
 	public void setName(String name) {
-		this.name = name;
+		this.selectedEntityName = name;
 	}
 	
 	//заполнить текущую сущность по имени.
@@ -96,13 +96,13 @@ public abstract class Editable extends JPanel implements MouseListener, MouseMot
     		//TODO: надо бы элегантнее пробросить сюда ListGUI - просто передача его в аргументах немножко громоздкая
     		// как-то обыграть это через события? 
     		// ps. попытки обратиться к eventSource проваливаются - ListGUI это панель, уже внутри которой лежит JList
-    		name = listGUI.getSelectedName();
+    		selectedEntityName = listGUI.getSelectedName();
     		try {
-				entity = Project.getInstance().getEntityByName(name);
+				entity = Project.getInstance().getEntityByName(selectedEntityName);
 			} catch (Exception e1) {
-				logger.severe("Entity with name '"+name+"' was not found! Cannot display it on panel!");
+				logger.severe("Entity with name '"+selectedEntityName+"' was not found! Cannot display it on panel!");
 			}
-    		image = Project.getInstance().loadImageByName(name);
+    		image = Project.getInstance().loadImageByName(selectedEntityName);
     		//TODO: if(image == null) вызов FileChooser'a и выбор изображения
     		
     		this.repaint();

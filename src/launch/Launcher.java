@@ -13,6 +13,8 @@ import org.xml.sax.SAXException;
 import gui.MainGUI;
 
 public class Launcher {
+	
+	private static MainGUI mainGUI;
 
 	public static void main(String[] args) throws SAXException, IOException, ParserConfigurationException {
 		// Настройка системы логгирования
@@ -31,7 +33,12 @@ public class Launcher {
 		rootLogger.info("Root Handler Logging level is "+lv.getName());
     	
 		MainGUI gui = new MainGUI();
+		mainGUI = gui;
 		gui.setVisible(true);
+	}
+	
+	public static MainGUI getMainGUI() {
+		return mainGUI;
 	}
 
 }

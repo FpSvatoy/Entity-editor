@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseEvent;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -26,8 +27,6 @@ public class DrawboxEditor extends Editable {
 
         logger.setLevel(Level.CONFIG);
     }
-
-
 
 	@Override
 	public void drawing(Graphics2D g) {
@@ -71,7 +70,9 @@ public class DrawboxEditor extends Editable {
 	}
 
 	@Override
-	public void saveDataInEntity() { }
+	public void saveDataInEntity() { 
+		entity.setDrawbox(new Drawbox(drawboxPoints));
+	}
 
 
 	@Override
@@ -92,6 +93,8 @@ public class DrawboxEditor extends Editable {
 				}
 				basePoints.add(baseStart);
 				basePoints.add(baseEnd);
+				
+				saveDataInEntity();
 			}
 		} 
 	}
@@ -103,6 +106,9 @@ public class DrawboxEditor extends Editable {
 		repaint();
 	}
 
+	
+	// эта штука очищает точки при нажатии универскальной кнопки очистки в Main GUI. Это следует рефакторнуть и вместо передачи события сюда,
+	// обрабатывать его прямо в Main GUI(лямбдой) вызывая отсюда только метод в духе clearPoints()
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		JTabbedPane parent = (JTabbedPane) getParent();

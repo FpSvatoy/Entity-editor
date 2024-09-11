@@ -29,14 +29,12 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 import exception.DuplicateEntryException;
+import launch.Launcher;
 import model.Entity;
 
 
 /**
  * Класс данных, который оперирует их сохранением, загрузкой, и хранением в памяти. 
- * Он нужен для отделения Модели от Представления (см. <a href="https://ru.wikipedia.org/wiki/Model-View-Controller">MVC</a>), чтобы их можно было менять независимо друг от друга.
- * Например, при добавлении новой кнопки данные можно будет получить через существующий интерфейс класса не меняя код.
- * 
  * ВАЖНО: данный класс хранит так же актуальную копию XML-представления файла 
  * */
 public class Project implements Iterable<Entity> {
@@ -133,6 +131,8 @@ public class Project implements Iterable<Entity> {
 		factory = DocumentBuilderFactory.newInstance();
 		builder = factory.newDocumentBuilder();
 		document = builder.parse(new File(path+fileName));
+		if(Launcher.getMainGUI() != null) // at the first program launch, main gui creates list gui before static link to main gui is set
+			Launcher.getMainGUI().setTitle("Hitbox/Drawbox Editor: " + path + fileName);
 	    // Получение списка всех элементов objecttype внутри корневого элемента (getDocumentElement возвращает ROOT элемент XML файла).
 	    NodeList objecttypeElements = document.getDocumentElement().getElementsByTagName("objecttype");
 		for(int i = 0; i < objecttypeElements.getLength(); i++) {

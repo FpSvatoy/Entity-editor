@@ -16,6 +16,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 
 import listeners.OpenXMLFileButtonListener;
+import repository.Project;
 
 public class MainGUI extends JFrame{	
 	ListGUI list;
@@ -67,7 +68,7 @@ public class MainGUI extends JFrame{
         OpenXMLFileButtonListener = new OpenXMLFileButtonListener(list);
 		
 		openXMLJButton = createButton("XML",5,5, OpenXMLFileButtonListener,"res/xml.png");
-		saveXMLJButton = createButton("Save",80,5,null,"res/download.png");
+		saveXMLJButton = createButton("Save",80,5,(e)-> Project.getInstance().printXMlToConsole(),"res/download.png");
 		clearLinesJButton = createButton("Clear lines",155,5,null,"res/destroy.png");
 		
 		clearLinesJButton.addActionListener(drawBoxPanel);
