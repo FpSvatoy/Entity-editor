@@ -28,6 +28,8 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
+import events.EntityDrawboxChangedEvent;
+import events.EntityDrawboxChangedListener;
 import exception.DuplicateEntryException;
 import launch.Launcher;
 import model.Entity;
@@ -37,7 +39,7 @@ import model.Entity;
  * Класс данных, который оперирует их сохранением, загрузкой, и хранением в памяти. 
  * ВАЖНО: данный класс хранит так же актуальную копию XML-представления файла 
  * */
-public class Project implements Iterable<Entity> {
+public class Project implements Iterable<Entity>, EntityDrawboxChangedListener {
 	
 	/**
 	 * Путь к XML по-умолчанию.
@@ -330,6 +332,12 @@ public class Project implements Iterable<Entity> {
 	@Deprecated
 	public List<Entity> getListEntity() {
 		return listEntity;
+	}
+
+	@Override
+	public void getEvent(EntityDrawboxChangedEvent event) {
+		// TODO Auto-generated method stub
+		
 	}
 }
 //в момент окончания рисования, в зависимости в какой мы рисуем вкладке хитбокса,

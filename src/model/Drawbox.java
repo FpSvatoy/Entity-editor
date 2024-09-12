@@ -44,6 +44,15 @@ public class Drawbox {
 			}
 		}
 	}
+	//Возвращает все точки дравбокса через пробел.
+	@Override
+	public String toString() {
+		String stringDrawbox="";
+		for (Point point : drawboxlistPoints) {
+			stringDrawbox+=point.x+" "+point.y+" ";
+		}
+		return stringDrawbox;
+	}
 	
 	public List<Point> getDrawboxlistPoints() {
 		return drawboxlistPoints;

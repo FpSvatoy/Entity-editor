@@ -87,6 +87,9 @@ public class MainGUI extends JFrame{
         hitdrawPane.addTab(null, new ImageIcon("res/formless.png"),hitboxPoligonPanel, null);
         hitdrawPane.setTabPlacement(JTabbedPane.LEFT);
 
+        //Оформление подписок к издателям.
+        drawBoxPanel.subscribe(Project.getInstance()); // подписка: Project получит данные ввиде обьекта Event, содержащий аднные drawbox при отрисовке последней точки из 4-х.
+        
 	}
 	@Override
 	public void paint(Graphics g){

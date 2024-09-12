@@ -4,27 +4,33 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseEvent;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.Flow.Subscriber;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.swing.JTabbedPane;
 
+import events.EntityDrawboxChangedEvent;
+import events.EntityDrawboxChangedListener;
 import model.Drawbox;
 import model.Point;
+import repository.Project;
 
 public class DrawboxEditor extends Editable {
 	
 	private List<Point> drawboxPoints;
 	private List<Point> basePoints;
 	Logger logger = Logger.getLogger("gui.DrawboxRectangleEditor");
-	
 	Point currentPoint = new Point(0, 0);
+	private List<EntityDrawboxChangedListener> listeners = new ArrayList<>();
+	
 
     DrawboxEditor(ListGUI listGUI) {
         super(listGUI);
-
         logger.setLevel(Level.CONFIG);
     }
 
@@ -95,17 +101,56 @@ public class DrawboxEditor extends Editable {
 				basePoints.add(baseEnd);
 				
 				saveDataInEntity();
+				//при выборе 4-й точки и формировании данных drawbox, уведомляем всех подписчит
+				if(listeners!=null) {
+					notifySubscribers();	
+				}
+				
 			}
 		} 
 	}
-
+	/*Точки должны идти в определенном порядке: 
+	 * левая верхняя точка, правая верхняя, нижняя правая, нижняя левая;
+	 * Обе нижние точки, т.е. 3 и 4 являются основанием - хардкод.
+	 * P.s. возможно это не критично, и в сторе предусмотрено, что бы они сортировались,
+	 * но на данном этапе на всякий случай стоит так поступить*/
+	private void sortingDrawboxPoints() {
+		//окей, это написано плохо, но... Похуй, пляшем)
+		for(int i = 0; i<3; i++) {
+			Point leftTopPoint = drawboxPoints.get(i);
+			for(int j = i+1; j<4; j++) {
+				if((leftTopPoint.x>drawboxPoints.get(j).x)&&(leftTopPoint.y>drawboxPoints.get(j).y)) {
+					 Collections.swap(drawboxPoints, 0, j);
+					 
+				}
+				
+			}
+		}
+		
+		
+	}
+	
 	@Override
 	public void mouseMoved(MouseEvent e) {
 		currentPoint.x = e.getX();
 		currentPoint.y = e.getY();
 		repaint();
 	}
-
+	
+	
+	public void subscribe(EntityDrawboxChangedListener listener) {
+        listeners.add(listener);
+	}
+	
+	public void unsubscribe(EntityDrawboxChangedListener listener) {
+        listeners.remove(listener);
+	}
+	
+	private void notifySubscribers() {
+		for (EntityDrawboxChangedListener listener : listeners) {
+			listener.getEvent(new EntityDrawboxChangedEvent(entity.getDrawbox()));
+		}
+	}
 	
 	// эта штука очищает точки при нажатии универскальной кнопки очистки в Main GUI. Это следует рефакторнуть и вместо передачи события сюда,
 	// обрабатывать его прямо в Main GUI(лямбдой) вызывая отсюда только метод в духе clearPoints()
