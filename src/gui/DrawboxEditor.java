@@ -87,19 +87,7 @@ public class DrawboxEditor extends Editable {
 			Point p = new Point(e.getX(), e.getY());
 			drawboxPoints.add(p);
 			if(drawboxPoints.size() == 4) {
-				Point baseStart = drawboxPoints.get(0), 
-					  baseEnd = drawboxPoints.get(1);
-				for(Point pseudo: drawboxPoints) { // если не будет цикла в цикле - не выйдет сравнить всех со всеми
-					for(Point vertex: drawboxPoints) { // что приведёт к артефактам построения основания
-						if(vertex != baseStart && vertex != baseEnd) {
-							if(vertex.y >= baseStart.y) baseStart = vertex;
-							else if(vertex.y >= baseEnd.y) baseEnd = vertex;
-						}
-					}
-				}
-				basePoints.add(baseStart);
-				basePoints.add(baseEnd);
-				
+				sortingDrawboxPoints();		
 				saveDataInEntity();
 				//при выборе 4-й точки и формировании данных drawbox, уведомляем всех подписчит
 				if(listeners!=null) {
@@ -116,16 +104,24 @@ public class DrawboxEditor extends Editable {
 	 * но на данном этапе на всякий случай стоит так поступить*/
 	private void sortingDrawboxPoints() {
 		//окей, это написано плохо, но... Похуй, пляшем)
-		for(int i = 0; i<3; i++) {
-			Point leftTopPoint = drawboxPoints.get(i);
-			for(int j = i+1; j<4; j++) {
-				if((leftTopPoint.x>drawboxPoints.get(j).x)&&(leftTopPoint.y>drawboxPoints.get(j).y)) {
-					 Collections.swap(drawboxPoints, 0, j);
-					 
-				}
-				
-			}
+		Collections.sort(
+				drawboxPoints,
+			    (point1, point2) -> Float.compare(point1.y, point2.y)
+			);
+		if(drawboxPoints.get(0).x>drawboxPoints.get(1).x) {
+			Collections.swap(drawboxPoints, 0, 1);
 		}
+		if(drawboxPoints.get(2).x<drawboxPoints.get(3).x) {
+			Collections.swap(drawboxPoints, 2, 3);
+		}
+		/*Багтест, проверка очередности построения точек
+		 * 
+		 * System.out.println("_______________");
+		int i = 0;
+		for (Point point : drawboxPoints) {
+			System.out.println("Point["+i+"]: ("+point.x+" ; "+point.y+");");
+			i++;
+		}*/
 		
 		
 	}

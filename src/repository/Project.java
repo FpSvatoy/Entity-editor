@@ -333,7 +333,11 @@ public class Project implements Iterable<Entity>, EntityDrawboxChangedListener {
 	public List<Entity> getListEntity() {
 		return listEntity;
 	}
-
+/*
+ * Получение события при отрисовке нового Drawbox, для изменения XML-дерева.
+ * Объект event хранит в себе ссылку на новый объект drawbox и объект entity, для которой он был создан.
+ * Необходимо из Entity получить имя сущности и в XML-дереве изменить данные drawbox-а, используя функцию toString.
+ * */
 	@Override
 	public void getEvent(EntityDrawboxChangedEvent event) {
 		// TODO Auto-generated method stub
