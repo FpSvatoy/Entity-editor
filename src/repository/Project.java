@@ -11,6 +11,8 @@ import java.util.List;
 import java.util.logging.Logger;
 
 import javax.imageio.ImageIO;
+import javax.swing.ImageIcon;
+import javax.swing.JOptionPane;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -46,23 +48,19 @@ public class Project implements Iterable<Entity>, EntityDrawboxChangedListener {
 	 * Просто заглушка, обычно заменяется актуальным путём в ходе изменения программы. <br> 
 	 * Cм. {@link #setXMLPath(String)} и {@link #getXMLPath()}
 	 * */
-	public static final String DEFAULT_XML_PATH = "res/";
+	public static final String DEFAULT_XML_PATH = "res/"; //TODO: make an actual path to example objecttypes in the root of the project
 	public static final String DEFAULT_XML_FILENAME = "objecttypes.xml";
 	
 	static Project thisProject;
 	private List <Entity> listEntity = new ArrayList<Entity>();
 	private String path = DEFAULT_XML_PATH;	
 	private String fileName = DEFAULT_XML_FILENAME;
-	 // Получение фабрики, чтобы после получить билдер документов.
     private DocumentBuilderFactory factory;
-    // Получили из фабрики билдер, который парсит XML, создает структуру Document в виде иерархического дерева.
     private DocumentBuilder builder;
-    // Запарсили XML, создав структуру Document. Теперь у нас есть доступ ко всем элементам, каким нам нужно.
     private Document document;
     
 	private static Logger logger = Logger.getLogger("repository.Project");
     
-    //!!!РЕАЛИЗАЦИЯ СИНГЛИТОНА!НАЧАЛО!!!
 	private Project(){};
 	
 	public static Project getInstance() {
@@ -71,7 +69,6 @@ public class Project implements Iterable<Entity>, EntityDrawboxChangedListener {
 		}
 		return thisProject;
 	};
-	//!!!РЕАЛИЗАЦИЯ СИНГЛИТОНА!ОКОНЧАНИЕ!!!
 	
 	/**
 	 * Устанавливает значение пути к XML. Все операции загрузки и сохранения будут работать с этой директорией.<br>
@@ -80,12 +77,14 @@ public class Project implements Iterable<Entity>, EntityDrawboxChangedListener {
 	 * <br><i>например: "C:/User/map/" или "/home/username/map/" или "res/map" (относительный путь рассчитывается от корня проекта)</i>
 	 * */
 	public void setXMLPath(String newPath) {
-		path = newPath;
+		if(newPath != null && !newPath.isEmpty()) {
+			path = newPath.trim(); 
+		} else System.err.println("Trying to submit empty path! Project.setXMLPath()");
 	}
 
 	/**
 	 * Возвращает актуальный путь к директории, в которой лежит XML-файл с типами объектов, а так же папки с ресурсами. <br>
-	 * ps. считается, что ресурсы находятся в той же папке что XML-файл
+	 * Считается, что ресурсы находятся в той же папке что XML-файл. Должен включать / в конце
 	 * */
 	public String getXMLPath() {
 		return path;
@@ -108,12 +107,12 @@ public class Project implements Iterable<Entity>, EntityDrawboxChangedListener {
 	}
 	
 	/**
-	 * Перегрузка {@link #load()}.<br>
 	 * Использует {@link #setXMLFileName(String)} и {@link #setXMLPath(String)} для того, чтобы сохранить новый путь к XML-файлу и его имя. 
 	 * Повторно вызывать их вручную не обязательно.
 	 * 
 	 * @param directory - папка где хранится XML-файл и ресурсы (см. {@link #getXMLPath()})
 	 * @param name - имя XML-файла с определениями типов сущностей
+	 * @see #load()
 	 * */
 	public void load(String directory, String name) {
 		setXMLPath(directory);
@@ -138,13 +137,10 @@ public class Project implements Iterable<Entity>, EntityDrawboxChangedListener {
 	    // Получение списка всех элементов objecttype внутри корневого элемента (getDocumentElement возвращает ROOT элемент XML файла).
 	    NodeList objecttypeElements = document.getDocumentElement().getElementsByTagName("objecttype");
 		for(int i = 0; i < objecttypeElements.getLength(); i++) {
-			//System.out.println("---------------------");
 			Node objecttype = objecttypeElements.item(i);
 			NamedNodeMap attributesObject = objecttype.getAttributes();
 			String entityName = new String(attributesObject.getNamedItem("name").getNodeValue());
-			//System.out.println("Name: "+entityName);
 			parsingElementXMLtoElementList(entityName,objecttype);
-			//System.out.println("---------------------");
 		}
 	}
 	
@@ -247,7 +243,7 @@ public class Project implements Iterable<Entity>, EntityDrawboxChangedListener {
 		//printXMlToConsole(); //DEBUG!
 	}
 	
-	/*
+	/**
 	 * Удаляется обьект из списка всех сущностей, и из xml-дерева
 	*/
 	public void removeEntity(Entity e) {
@@ -280,7 +276,9 @@ public class Project implements Iterable<Entity>, EntityDrawboxChangedListener {
 	}
 	
 	
-	private void writeXML() {
+	public void writeXML() {
+		stripEmptyElements(document);
+		
 		try {
 			TransformerFactory transformerFactory = TransformerFactory.newInstance();
 	        transformerFactory.setAttribute("indent-number", 4);
@@ -289,10 +287,11 @@ public class Project implements Iterable<Entity>, EntityDrawboxChangedListener {
 	        transformer.setOutputProperty(OutputKeys.INDENT, "yes");
 
 			DOMSource source = new DOMSource(document);
-			StreamResult result = new StreamResult(new FileOutputStream(path));
+			StreamResult result = new StreamResult(new FileOutputStream(getXMLPath() + getXMLFileName()));
 			transformer.transform(source, result);
+			JOptionPane.showMessageDialog(null, "Бугага, сохранилось!", "Success", JOptionPane.INFORMATION_MESSAGE);
 		} catch (TransformerException | FileNotFoundException e) {
-			System.err.println("Saving project is unsuccsessfull! Erorr is: "+e);
+			JOptionPane.showMessageDialog(null, "Saving project is unsuccsessfull! Erorr is: "+e, "Project save unsuccsesfull", JOptionPane.ERROR_MESSAGE);
 		}
 	}
 		
@@ -304,6 +303,8 @@ public class Project implements Iterable<Entity>, EntityDrawboxChangedListener {
 	
 	
 	public void printXMlToConsole() {
+		stripEmptyElements(document);
+		
 		try {
 			TransformerFactory transformerFactory = TransformerFactory.newInstance();
 	        transformerFactory.setAttribute("indent-number", 4);
@@ -333,15 +334,51 @@ public class Project implements Iterable<Entity>, EntityDrawboxChangedListener {
 	public List<Entity> getListEntity() {
 		return listEntity;
 	}
-/*
- * Получение события при отрисовке нового Drawbox, для изменения XML-дерева.
- * Объект event хранит в себе ссылку на новый объект drawbox и объект entity, для которой он был создан.
- * Необходимо из Entity получить имя сущности и в XML-дереве изменить данные drawbox-а, используя функцию toString.
- * */
+	/**
+	 * Получение события при отрисовке нового Drawbox, для изменения XML-дерева.
+	 * Объект event хранит в себе ссылку на новый объект drawbox и объект entity, для которой он был создан.
+	 * */
 	@Override
-	public void getEvent(EntityDrawboxChangedEvent event) {
-		// TODO Auto-generated method stub
-		
+	public void drawboxChanged(EntityDrawboxChangedEvent event) {
+		String entityName = event.owner.getName();
+		Node entityToUpdate = getEntityXMLNodeByName(entityName);
+		NodeList properties = entityToUpdate.getChildNodes();
+		for(int i = 0; i < properties.getLength(); i++) {
+			if(properties.item(i) instanceof Element) { // ignoring #text nodes
+				//we have hitbox, drawbox and class, gotta set the right one
+				Element propertyElement = ((Element)properties.item(i));
+				if (propertyElement.getAttribute("name").equals("drawbox")) {
+					propertyElement.setAttribute("default", event.owner.getDrawbox().toString());
+				}
+			}
+		}
+	}
+	
+	private Node getEntityXMLNodeByName(String name) { //returns entitie's objecttype node
+		NodeList nl = document.getElementsByTagName("objecttype");
+		for(int i = 0; i < nl.getLength(); i++) {
+			Node objecttype = nl.item(i);
+			if(objecttype.getAttributes().getNamedItem("name").getNodeValue().equals(name)) {
+				return objecttype;
+			}
+		}
+		return null;
+	}
+	
+	//https://stackoverflow.com/a/64659614/6929164
+	public static void stripEmptyElements(Node node)
+	{
+	    NodeList children = node.getChildNodes();
+	    for(int i = 0; i < children.getLength(); ++i) {
+	        Node child = children.item(i);
+	        if(child.getNodeType() == Node.TEXT_NODE) {
+	            if (child.getTextContent().trim().length() == 0) {
+	                child.getParentNode().removeChild(child);
+	                i--;
+	            }
+	        }
+	        stripEmptyElements(child);
+	    }
 	}
 }
 //в момент окончания рисования, в зависимости в какой мы рисуем вкладке хитбокса,

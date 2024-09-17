@@ -53,8 +53,8 @@ public class Entity {
 	public void PrintEntity() {
 		System.out.println("---------------------");
 		System.out.println("Name: "+thisName);
-		this.thisDrawbox.Print();
-		this.thisHitbox.Print();
+		this.thisDrawbox.printToConsole();
+		this.thisHitbox.printToConsole();
 		System.out.println("---------------------");
 	}
 }

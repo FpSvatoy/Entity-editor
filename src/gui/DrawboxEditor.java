@@ -144,7 +144,9 @@ public class DrawboxEditor extends Editable {
 	
 	private void notifySubscribers() {
 		for (EntityDrawboxChangedListener listener : listeners) {
-			listener.getEvent(new EntityDrawboxChangedEvent(entity.getDrawbox()));
+			listener.drawboxChanged(
+				new EntityDrawboxChangedEvent(entity.getDrawbox(), entity)
+			);
 		}
 	}
 	

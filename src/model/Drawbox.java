@@ -49,7 +49,7 @@ public class Drawbox {
 	public String toString() {
 		String stringDrawbox="";
 		for (Point point : drawboxlistPoints) {
-			stringDrawbox+=point.x+" "+point.y+" ";
+			stringDrawbox+=((int)point.x)+" "+((int)point.y)+" "; //(int) because it is for XML
 		}
 		return stringDrawbox;
 	}
@@ -61,7 +61,9 @@ public class Drawbox {
 	public List<Point> getbaseListPoints() {
 		return baseListPoints;
 	}
-	public void Print() {
+	
+	//not the same as toString()! the latter is for XML while printToConsole() is for console
+	public void printToConsole() {
 		System.out.println("|||Drawbox:");
 		if(baseListPoints!=null&&drawboxlistPoints!=null) {
 			System.out.println("drawboxlistPoints:");

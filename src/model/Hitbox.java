@@ -65,7 +65,9 @@ public class Hitbox {
 	public List<Point> getListPoints() {
 		return listPoints;
 	}
-	public void Print() {
+	
+	//not the same as toString()! the latter is for XML while printToConsole() is for console
+	public void printToConsole() {
 		System.out.println();
 		System.out.println("|||Hitbox:");
 		if(shape!=null&&listPoints!=null) {

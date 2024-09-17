@@ -1,23 +1,23 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <objecttypes>
- <objecttype name="misato" color="#a0a0a4">
-  <property name="class" type="string" default="Solid"/>
-  <property name="drawbox" type="string" default="2 1 254 1 254 338 2 336"/>
-  <property name="hitbox" type="string" default="Circle 4 6 24"/>
- </objecttype>
- <objecttype name="starlight" color="#a0a0a4">
-  <property name="class" type="string" default="Solid"/>
-  <property name="drawbox" type="string" default="2 1 253 1 254 468 2 490"/>
-  <property name="hitbox" type="string" default="Rectangle 0 0 76 119"/>
- </objecttype>
- <objecttype name="tavern" color="#a0a0a4">
-  <property name="class" type="string" default="Solid"/>
-  <property name="drawbox" type="string" default="3 2 252 1 253 605 6 608"/>
-  <property name="hitbox" type="string" default="Rectangle 0 0 96 98"/>
- </objecttype>
- <objecttype name="TopHome" color="#a0a0a4">
-  <property name="class" type="string" default="Solid"/>
-  <property name="drawbox" type="string" default="3 2 252 1 253 605 6 608"/>
-  <property name="hitbox" type="string" default="Rectangle 0 0 96 98"/>
- </objecttype>
+    <objecttype color="#a0a0a4" name="misato">
+        <property default="Solid" name="class" type="string"/>
+        <property default="2 38 157 2 196 183 74 191 " name="drawbox" type="string"/>
+        <property default="Circle 4 6 24" name="hitbox" type="string"/>
+    </objecttype>
+    <objecttype color="#a0a0a4" name="starlight">
+        <property default="Solid" name="class" type="string"/>
+        <property default="6 2 224 14 206 170 34 176 " name="drawbox" type="string"/>
+        <property default="Rectangle 0 0 76 119" name="hitbox" type="string"/>
+    </objecttype>
+    <objecttype color="#a0a0a4" name="tavern">
+        <property default="Solid" name="class" type="string"/>
+        <property default="3 2 252 1 253 605 6 608" name="drawbox" type="string"/>
+        <property default="Rectangle 0 0 96 98" name="hitbox" type="string"/>
+    </objecttype>
+    <objecttype color="#a0a0a4" name="TopHome">
+        <property default="Solid" name="class" type="string"/>
+        <property default="3 2 252 1 253 605 6 608" name="drawbox" type="string"/>
+        <property default="Rectangle 0 0 96 98" name="hitbox" type="string"/>
+    </objecttype>
 </objecttypes>
